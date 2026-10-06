@@ -1,0 +1,7 @@
+{
+  "name": "Tender Document Package Builder",
+  "description": "Professional Tender Document Package Builder with requirement matching, duplicate SHA-256 detection, PDF merging with custom cover page, and XLSX checklist export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
