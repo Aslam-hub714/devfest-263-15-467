@@ -153,6 +153,20 @@
               <span>{{ lang === 'bn' ? 'নমুনা' : 'Demo' }}</span>
             </button>
 
+            <!-- Submission View Toggle Button (Screenshot-Ready Evaluation Mode) -->
+            <button 
+              type="button" 
+              @click="isSubmissionView = !isSubmissionView"
+              :class="isSubmissionView ? 'bg-indigo-600 text-white shadow ring-2 ring-indigo-400 border-indigo-500' : 'bg-slate-800 hover:bg-slate-700 text-indigo-300 border-slate-700'"
+              class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center gap-1.5"
+              :title="lang === 'bn' ? 'স্ক্রিনশটের জন্য পরিষ্কার সাবমিশন ভিউ টগল করুন' : 'Toggle clean screenshot-ready submission view'">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>{{ isSubmissionView ? (lang === 'bn' ? 'স্বাভাবিক ভিউ' : 'Normal View') : (lang === 'bn' ? 'সাবমিশন ভিউ' : 'Submission View') }}</span>
+            </button>
+
             <!-- Language Switcher -->
             <div class="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700 ml-1">
               <button 
@@ -283,8 +297,57 @@
           </button>
         </div>
 
+        <!-- SCREENSHOT-READY SUBMISSION VIEW HEADER (Requirement 3) -->
+        <div v-if="isSubmissionView" class="bg-slate-900 border-2 border-indigo-500/50 rounded-2xl p-6 text-white shadow-xl animate-fade-in">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📸</span>
+                  <span>SCREENSHOT-READY DOSSIER MATRIX</span>
+                </span>
+                <span :class="hasBlockingIssues || duplicateFilesCount > 0 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border">
+                  {{ hasBlockingIssues || duplicateFilesCount > 0 ? 'STATUS: ACTION REQUIRED' : 'STATUS: READY TO SUBMIT' }}
+                </span>
+              </div>
+              <h2 class="text-xl font-extrabold text-white tracking-tight">{{ tender.tender_title || 'Tender Document Package Builder' }}</h2>
+              <p class="text-xs text-slate-400 mt-0.5 font-mono">
+                TENDER ID: <span class="text-amber-300 font-bold">{{ tender.tender_id || 'TND-2026-BD' }}</span> • 
+                PROCURING ENTITY: <span class="text-slate-200">{{ tender.procuring_entity || 'Department of ICT' }}</span>
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button 
+                type="button" 
+                @click="isSubmissionView = false" 
+                class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition">
+                ✕ {{ lang === 'bn' ? 'স্বাভাবিক ভিউতে ফিরুন' : 'Exit Submission View' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-xs">
+            <div class="p-3 rounded-xl bg-slate-800/70 border border-slate-700">
+              <span class="text-slate-400 text-[11px] block">{{ lang === 'bn' ? 'দরদাতা প্রতিষ্ঠান' : 'Bidder Entity' }}</span>
+              <span class="font-bold text-white text-sm truncate block">{{ tender.bidder_name || 'Apex Enterprise Ltd.' }}</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-800/70 border border-slate-700">
+              <span class="text-slate-400 text-[11px] block">{{ lang === 'bn' ? 'জমা দেওয়ার শেষ সময়' : 'Submission Deadline' }}</span>
+              <span class="font-bold text-amber-300 text-sm block font-mono">{{ tender.submission_deadline || 'No Deadline' }}</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-800/70 border border-slate-700">
+              <span class="text-slate-400 text-[11px] block">{{ lang === 'bn' ? 'অন্তর্ভুক্ত নথি' : 'Matched Documents' }}</span>
+              <span class="font-bold text-emerald-400 text-sm block">{{ matchedDocumentsCount }} / {{ sortedRequirements.length }} Attached</span>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-800/70 border border-slate-700">
+              <span class="text-slate-400 text-[11px] block">{{ lang === 'bn' ? 'মোট আনুমানিক পৃষ্ঠা' : 'Total Dossier Pages' }}</span>
+              <span class="font-bold text-cyan-300 text-sm block font-mono">{{ totalPackageEstimatedPages }} pages (Cover + TOC + Enclosures)</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Top Row Grid: Tender Metadata, Multi-PDF Uploader, and Seal Overlay -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div v-show="!isSubmissionView" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           <!-- 1. Tender Specifications & Requirements Loader (5 Cols) -->
           <div class="lg:col-span-5 bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col justify-between">
@@ -421,12 +484,24 @@
                     <div class="min-w-0">
                       <p class="font-medium text-slate-800 truncate" :title="file.name">{{ file.name }}</p>
                       
-                      <!-- Corrupt / Encrypted Warning Badge (Robust Handling 4) -->
-                      <div v-if="file.isCorrupt" class="flex items-center gap-1 text-[10px] text-red-700 font-bold">
-                        <svg class="w-3 h-3 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                      <!-- Corrupt or Protected PDF Error Badge (Requirement 1) -->
+                      <div v-if="file.isCorrupt" class="flex items-center gap-1.5 mt-0.5">
+                        <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[9px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                          <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                          </svg>
+                          <span>Corrupt or Protected PDF</span>
+                        </span>
+                        <span class="text-[10px] text-rose-600 font-medium">({{ lang === 'bn' ? 'বাদ থাকবে' : 'Bypassed' }})</span>
+                      </div>
+
+                      <!-- Async Hashing Spinner (Requirement 3) -->
+                      <div v-else-if="file.isHashing" class="flex items-center gap-1.5 text-[10px] text-amber-700 font-medium mt-0.5">
+                        <svg class="animate-spin w-3 h-3 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                         </svg>
-                        <span>{{ lang === 'bn' ? 'ত্রুটিপূর্ণ বা পাসওয়ার্ড সুরক্ষিত পিডিএফ (অকার্যকর)' : 'Corrupt or Encrypted PDF' }}</span>
+                        <span class="animate-pulse">{{ lang === 'bn' ? 'SHA-256 হ্যাশ গণনা করা হচ্ছে...' : 'Computing SHA-256 hash...' }}</span>
                       </div>
 
                       <div v-else class="flex items-center gap-2 text-[10px] text-slate-500">
@@ -434,7 +509,7 @@
                         <span>•</span>
                         <span>{{ formatFileSize(file.size) }}</span>
                         <span>•</span>
-                        <span class="font-mono text-slate-400" :title="'SHA-256: ' + file.hash">#{{ file.hash.substring(0, 6) }}</span>
+                        <span class="font-mono text-slate-400" :title="'SHA-256: ' + file.hash">#{{ file.hash ? file.hash.substring(0, 6) : '...' }}</span>
                       </div>
                     </div>
                   </div>
@@ -707,6 +782,7 @@
                       <input 
                         type="date" 
                         v-model="item.expiryDate"
+                        @input="onDateInput(item)"
                         class="w-full text-xs py-1.5 px-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-700" 
                         :class="!item.expiryDate && item.matchedFileId ? 'border-amber-400 bg-amber-50/40 ring-1 ring-amber-300' : ''" />
                       <p v-if="tender.submission_deadline" class="text-[10px] text-slate-400 mt-1">
@@ -718,15 +794,15 @@
                     </div>
                   </td>
 
-                  <!-- Dynamic Status Badge (Modern Tailwind Theme: Green OK, Red Missing/Expired, Yellow Expiry Needed, Gray Not Provided) -->
+                  <!-- Dynamic Status Badge (Modern Tailwind Theme / Screenshot-Ready High Contrast) -->
                   <td class="py-3.5 px-4 text-center">
                     <span 
-                      :class="item.statusObj.badgeClass"
+                      :class="isSubmissionView ? item.statusObj.highContrastBadgeClass : item.statusObj.badgeClass"
                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border shadow-2xs">
                       <span :class="item.statusObj.dotClass" class="w-1.5 h-1.5 rounded-full"></span>
                       <span>{{ item.statusObj.label }}</span>
                     </span>
-                    <p v-if="item.statusObj.hint" class="text-[10px] text-slate-400 mt-1 max-w-[170px] mx-auto leading-tight">
+                    <p v-if="!isSubmissionView && item.statusObj.hint" class="text-[10px] text-slate-400 mt-1 max-w-[170px] mx-auto leading-tight">
                       {{ item.statusObj.hint }}
                     </p>
                   </td>
@@ -821,51 +897,51 @@
               </div>
             </div>
 
-            <!-- Right Buttons: Export Submission Folder Pack (Bonus 4), Export Checklist (.xlsx) & Generate Package (.pdf) -->
+            <!-- Right Buttons: Submission Export, Export Checklist (.xlsx), Generate Package & Folder Pack -->
             <div class="flex flex-wrap items-center gap-2.5 shrink-0">
               
-              <!-- Export Submission Folder Pack (Bonus 4) -->
-              <button 
-                type="button" 
-                @click="exportSubmissionFolderPack"
-                :disabled="hasBlockingIssues || isGenerating"
-                :class="hasBlockingIssues || isGenerating ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white shadow-md hover:shadow-lg border-teal-600'"
-                class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2"
-                :title="lang === 'bn' ? 'পিডিএফ, এক্সেল ও স্টেট ফাইল এক ক্লিকে সম্পূর্ণ ফোল্ডার ডাউনলোড করুন' : 'Download Complete Submission Pack: PDF, XLSX Checklist & State JSON'">
-                <svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-                </svg>
-                <span>{{ lang === 'bn' ? 'সাবমিশন ফোল্ডার প্যাক এক্সপোর্ট' : 'Export Submission Folder Pack' }}</span>
-              </button>
-
-              <!-- Export Checklist to Excel (SheetJS) -->
-              <button 
-                type="button" 
-                @click="exportChecklistExcel"
-                class="px-3.5 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-2xs transition flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <span>{{ lang === 'bn' ? 'চেকলিস্ট (.xlsx)' : 'Checklist (.xlsx)' }}</span>
-              </button>
-
-              <!-- Generate Package Button (pdf-lib) -->
+              <!-- Dedicated Submission Export Button (Requirement 2: <tender_id>_Package.pdf) -->
               <button 
                 type="button" 
                 @click="generatePackagePdf"
-                :disabled="hasBlockingIssues || isGenerating"
-                :class="hasBlockingIssues || isGenerating ? 'bg-slate-300 text-slate-500 cursor-not-allowed border-slate-300' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg border-emerald-600'"
-                class="px-4 py-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2">
-                
+                :disabled="hasBlockingIssues || duplicateFilesCount > 0 || isGenerating"
+                :class="hasBlockingIssues || duplicateFilesCount > 0 || isGenerating ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white shadow-md hover:shadow-lg border-emerald-600 ring-2 ring-emerald-300/40'"
+                class="px-4 py-2.5 rounded-xl border text-xs font-extrabold transition flex items-center gap-2"
+                :title="lang === 'bn' ? 'চূড়ান্ত সাবমিশন প্যাকেজ পিডিএফ ডাউনলোড করুন (' + (tender.tender_id || 'TND') + '_Package.pdf)' : 'Download finalized submission PDF (' + (tender.tender_id || 'TND') + '_Package.pdf)'">
                 <svg v-if="isGenerating" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                 </svg>
-                <svg v-else class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <svg v-else class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
+                <span>{{ isGenerating ? (lang === 'bn' ? 'প্যাকেজ প্রস্তুত হচ্ছে...' : 'Building PDF Package...') : (lang === 'bn' ? 'সাবমিশন এক্সপোর্ট (.pdf)' : 'Submission Export') }}</span>
+              </button>
 
-                <span>{{ isGenerating ? (lang === 'bn' ? 'প্যাকেজ প্রস্তুত হচ্ছে...' : 'Building PDF Package...') : (lang === 'bn' ? 'প্যাকেজ তৈরি (.pdf)' : 'Generate Package') }}</span>
+              <!-- Export Checklist to Excel (Requirement 2: <tender_id>_Checklist.xlsx) -->
+              <button 
+                type="button" 
+                @click="exportChecklistExcel"
+                class="px-3.5 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-2xs transition flex items-center gap-1.5"
+                :title="lang === 'bn' ? 'এক্সেল চেকলিস্ট ফাইল ডাউনলোড করুন (' + (tender.tender_id || 'TND') + '_Checklist.xlsx)' : 'Export Excel Checklist (' + (tender.tender_id || 'TND') + '_Checklist.xlsx)'">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span>{{ lang === 'bn' ? 'এক্সপোর্ট চেকলিস্ট (.xlsx)' : 'Export Checklist (.xlsx)' }}</span>
+              </button>
+
+              <!-- Export Submission Folder Pack (Bonus 4) -->
+              <button 
+                type="button" 
+                @click="exportSubmissionFolderPack"
+                :disabled="hasBlockingIssues || duplicateFilesCount > 0 || isGenerating"
+                :class="hasBlockingIssues || duplicateFilesCount > 0 || isGenerating ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-700 shadow-2xs'"
+                class="px-3.5 py-2.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5"
+                :title="lang === 'bn' ? 'পিডিএফ, এক্সেল ও স্টেট ফাইল এক ক্লিকে সম্পূর্ণ ফোল্ডার ডাউনলোড করুন' : 'Download Complete Submission Pack: PDF, XLSX Checklist & State JSON'">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                </svg>
+                <span>{{ lang === 'bn' ? 'সম্পূর্ণ ফোল্ডার প্যাক' : 'Full Folder Pack' }}</span>
               </button>
 
             </div>
@@ -1187,6 +1263,7 @@
           const uploadedFiles = ref([]);
           const isDragging = ref(false);
           const rejectedFilesList = ref([]);
+          const isSubmissionView = ref(false);
 
           // PDF Preview Modal State (pdf.js CDN - Bonus 3)
           const previewModalFile = ref(null);
@@ -1303,7 +1380,20 @@
             );
           };
 
-          // Robust PDF Verification and Processing (Feature 4 & Visual Feedback 5)
+          // Check if total uploaded size exceeds 50MB (Requirement 1)
+          const checkTotalUploadedSize = () => {
+            const totalBytes = uploadedFiles.value.reduce((acc, f) => acc + (f.size || 0), 0);
+            if (totalBytes > 50 * 1024 * 1024) {
+              showToast(
+                lang.value === 'bn' 
+                  ? 'সতর্কতা: মোট আপলোডকৃত ফাইলের সাইজ ৫০ মেগাবাইটের বেশি (Total size exceeds 50MB)!' 
+                  : 'Warning: Total uploaded file size exceeds 50MB.',
+                'warning'
+              );
+            }
+          };
+
+          // Robust PDF Verification and Processing (Feature 4, Async Hashing & Edge-Case Bypass)
           const processPdfFile = async (file) => {
             const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
             if (!isPdf) {
@@ -1319,11 +1409,35 @@
               return null;
             }
 
+            // Immediately create reactive file entry with isHashing = true for loading spinner
+            const newFileObj = {
+              id: 'file_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+              name: file.name,
+              size: file.size,
+              pageCount: 0,
+              bytes: null,
+              hash: '',
+              isHashing: true,
+              isDuplicate: false,
+              duplicateWith: null,
+              isCorrupt: false,
+              errorReason: null
+            };
+
+            uploadedFiles.value.push(newFileObj);
+
+            // Yield to browser to paint spinner
+            await new Promise(resolve => setTimeout(resolve, 30));
+
             try {
               const arrayBuffer = await file.arrayBuffer();
+              
+              // Async Crypto-JS SHA-256 hash calculation
               const hash = computeSHA256(arrayBuffer);
+              newFileObj.hash = hash;
+              newFileObj.bytes = new Uint8Array(arrayBuffer);
 
-              // Try parsing with pdf-lib to check validity, corruption, or encryption
+              // Try parsing with pdf-lib to check validity, corruption, or encryption in robust try-catch
               let pageCount = 0;
               let isCorrupt = false;
               let errorReason = null;
@@ -1332,43 +1446,42 @@
                 const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: false });
                 if (pdfDoc.isEncrypted) {
                   isCorrupt = true;
-                  errorReason = 'Password Protected / Encrypted PDF';
+                  errorReason = 'Corrupt or Protected PDF';
                 } else {
                   pageCount = pdfDoc.getPageCount();
                 }
               } catch (parseErr) {
-                console.warn('PDF load warning:', parseErr);
+                console.warn('PDF load warning for ' + file.name, parseErr);
                 isCorrupt = true;
-                errorReason = 'Corrupt or Encrypted PDF';
+                errorReason = 'Corrupt or Protected PDF';
               }
 
-              const newFileObj = {
-                id: 'file_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-                name: file.name,
-                size: file.size,
-                pageCount: pageCount,
-                bytes: new Uint8Array(arrayBuffer),
-                hash: hash,
-                isDuplicate: false,
-                duplicateWith: null,
-                isCorrupt: isCorrupt,
-                errorReason: errorReason
-              };
+              newFileObj.pageCount = pageCount;
+              newFileObj.isCorrupt = isCorrupt;
+              newFileObj.errorReason = errorReason;
+              newFileObj.isHashing = false;
 
               if (isCorrupt) {
                 showToast(
                   lang.value === 'bn' 
-                    ? `সতর্কতা: "${file.name}" ত্রুটিপূর্ণ বা পাসওয়ার্ড সুরক্ষিত হওয়ায় প্যাকেজে অন্তর্ভুক্ত হবে না।` 
-                    : `Warning: "${file.name}" is corrupt or encrypted and cannot be merged.`,
+                    ? `সতর্কতা: "${file.name}" ত্রুটিপূর্ণ বা পাসওয়ার্ড সুরক্ষিত (Corrupt or Protected PDF)। প্যাকেজে বাদ থাকবে।` 
+                    : `Warning: "${file.name}" is corrupt or protected and will be bypassed.`,
                   'warning'
                 );
               }
 
+              updateDuplicateFlags();
+              checkTotalUploadedSize();
               return newFileObj;
             } catch (err) {
               console.error('File read error:', err);
+              newFileObj.isCorrupt = true;
+              newFileObj.errorReason = 'Corrupt or Protected PDF';
+              newFileObj.isHashing = false;
+              updateDuplicateFlags();
+              checkTotalUploadedSize();
               showToast(`Error reading "${file.name}"`, 'error');
-              return null;
+              return newFileObj;
             }
           };
 
@@ -1380,15 +1493,12 @@
             let addedCount = 0;
             for (const file of files) {
               const processed = await processPdfFile(file);
-              if (processed) {
-                uploadedFiles.value.push(processed);
+              if (processed && !processed.isCorrupt) {
                 addedCount++;
               }
             }
 
             event.target.value = '';
-            updateDuplicateFlags();
-
             if (addedCount > 0) {
               showToast(
                 lang.value === 'bn'
@@ -1408,13 +1518,11 @@
             let addedCount = 0;
             for (const file of files) {
               const processed = await processPdfFile(file);
-              if (processed) {
-                uploadedFiles.value.push(processed);
+              if (processed && !processed.isCorrupt) {
                 addedCount++;
               }
             }
 
-            updateDuplicateFlags();
             if (addedCount > 0) {
               showToast(
                 lang.value === 'bn'
@@ -2013,12 +2121,20 @@
             req.matchedFileId = null;
           };
 
+          // On Date Input handler for guaranteed instant reactivity (Requirement 2)
+          const onDateInput = (req) => {
+            const target = requirements.value.find(r => r.id === req.id);
+            if (target) {
+              target.expiryDate = req.expiryDate;
+            }
+          };
+
           // Sorted requirements by order
           const sortedRequirements = computed(() => {
             return [...requirements.value].sort((a, b) => Number(a.order) - Number(b.order));
           });
 
-          // Dynamic Status System Computation with Modern Tailwind Badges (UI Polish 5)
+          // Dynamic Status System Computation with High-Contrast Badges & Instant Reactivity (Requirements 1, 2 & 3)
           const computedRequirements = computed(() => {
             const deadline = tender.value.submission_deadline;
 
@@ -2027,17 +2143,35 @@
               let status = 'Missing';
               let isBlocking = false;
               let label = 'Missing';
-              // Green for OK, Red for Missing/Expired, Yellow for Expiry Needed, Gray for Not Provided
+              // High contrast badges: Green for OK, Red for Missing/Expired, Yellow for Expiry Needed, Gray for Not Provided
               let badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
+              let highContrastBadgeClass = 'bg-rose-600 text-white ring-1 ring-rose-700 font-bold';
               let dotClass = 'bg-rose-600';
               let hint = '';
 
-              if (req.is_mandatory) {
+              if (matchedFile && matchedFile.isCorrupt) {
+                status = 'Corrupt or Protected PDF';
+                isBlocking = true;
+                label = lang.value === 'bn' ? 'ত্রুটিপূর্ণ/সুরক্ষিত ফাইল' : 'Corrupt or Protected PDF';
+                badgeClass = 'bg-rose-100 text-rose-900 border-rose-400';
+                highContrastBadgeClass = 'bg-rose-600 text-white ring-1 ring-rose-700 font-bold';
+                dotClass = 'bg-rose-700';
+                hint = lang.value === 'bn' ? 'ফাইলটি ত্রুটিপূর্ণ বা পাসওয়ার্ড সুরক্ষিত' : 'File is corrupt or protected and will be bypassed';
+              } else if (matchedFile && matchedFile.isDuplicate) {
+                status = 'Duplicate file';
+                isBlocking = true;
+                label = lang.value === 'bn' ? 'ডুপ্লিকেট ফাইল' : 'Duplicate File';
+                badgeClass = 'bg-rose-100 text-rose-900 border-rose-400';
+                highContrastBadgeClass = 'bg-rose-600 text-white ring-1 ring-rose-700 font-bold';
+                dotClass = 'bg-rose-700';
+                hint = lang.value === 'bn' ? 'ডুপ্লিকেট ফাইল সংযুক্ত করা নিষিদ্ধ' : 'Duplicate file strictly blocked';
+              } else if (req.is_mandatory) {
                 if (!matchedFile) {
                   status = 'Missing';
                   isBlocking = true;
                   label = lang.value === 'bn' ? 'অনুপস্থিত (Missing)' : 'Missing';
                   badgeClass = 'bg-rose-100 text-rose-800 border-rose-300';
+                  highContrastBadgeClass = 'bg-rose-600 text-white ring-1 ring-rose-700 font-bold';
                   dotClass = 'bg-rose-600';
                   hint = lang.value === 'bn' ? 'বাধ্যতামূলক নথি যুক্ত করা হয়নি' : 'Mandatory document missing';
                 } else if (req.has_expiry && !req.expiryDate) {
@@ -2045,6 +2179,7 @@
                   isBlocking = true;
                   label = lang.value === 'bn' ? 'মেয়াদ তারিখ প্রয়োজন' : 'Expiry date needed';
                   badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+                  highContrastBadgeClass = 'bg-amber-400 text-slate-950 ring-1 ring-amber-500 font-black';
                   dotClass = 'bg-amber-500';
                   hint = lang.value === 'bn' ? 'মেয়াদোত্তীর্ণ তারিখ প্রদান করুন' : 'Provide expiry date for matched file';
                 } else if (req.has_expiry && req.expiryDate) {
@@ -2053,6 +2188,7 @@
                     isBlocking = true;
                     label = lang.value === 'bn' ? 'মেয়াদোত্তীর্ণ (Expired)' : 'Expired';
                     badgeClass = 'bg-rose-100 text-rose-900 border-rose-400';
+                    highContrastBadgeClass = 'bg-rose-700 text-white ring-1 ring-rose-800 font-bold';
                     dotClass = 'bg-rose-700';
                     hint = lang.value === 'bn' ? 'জমা দেওয়ার শেষ তারিখের পূর্বে মেয়াদ শেষ' : 'Expires prior to submission deadline';
                   } else {
@@ -2060,6 +2196,7 @@
                     isBlocking = false;
                     label = 'OK';
                     badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    highContrastBadgeClass = 'bg-emerald-600 text-white ring-1 ring-emerald-700 font-bold';
                     dotClass = 'bg-emerald-600';
                     hint = '';
                   }
@@ -2068,6 +2205,7 @@
                   isBlocking = false;
                   label = 'OK';
                   badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  highContrastBadgeClass = 'bg-emerald-600 text-white ring-1 ring-emerald-700 font-bold';
                   dotClass = 'bg-emerald-600';
                   hint = '';
                 }
@@ -2078,6 +2216,7 @@
                   isBlocking = false;
                   label = lang.value === 'bn' ? 'দেওয়া হয়নি (Not provided)' : 'Not provided';
                   badgeClass = 'bg-slate-100 text-slate-600 border-slate-300';
+                  highContrastBadgeClass = 'bg-slate-500 text-white font-semibold';
                   dotClass = 'bg-slate-400';
                   hint = lang.value === 'bn' ? 'ঐচ্ছিক নথি (প্যাকেজে বাদ থাকবে)' : 'Optional (skipped in package)';
                 } else if (req.has_expiry && !req.expiryDate) {
@@ -2085,6 +2224,7 @@
                   isBlocking = true;
                   label = lang.value === 'bn' ? 'মেয়াদ তারিখ প্রয়োজন' : 'Expiry date needed';
                   badgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+                  highContrastBadgeClass = 'bg-amber-400 text-slate-950 ring-1 ring-amber-500 font-black';
                   dotClass = 'bg-amber-500';
                   hint = lang.value === 'bn' ? 'সংযুক্ত নথির মেয়াদ শেষ হওয়ার তারিখ দিন' : 'Expiry date needed for matched file';
                 } else if (req.has_expiry && req.expiryDate) {
@@ -2093,6 +2233,7 @@
                     isBlocking = true;
                     label = lang.value === 'bn' ? 'মেয়াদোত্তীর্ণ (Expired)' : 'Expired';
                     badgeClass = 'bg-rose-100 text-rose-900 border-rose-400';
+                    highContrastBadgeClass = 'bg-rose-700 text-white ring-1 ring-rose-800 font-bold';
                     dotClass = 'bg-rose-700';
                     hint = lang.value === 'bn' ? 'জমা দেওয়ার শেষ তারিখের পূর্বে মেয়াদ শেষ' : 'Expires prior to submission deadline';
                   } else {
@@ -2100,6 +2241,7 @@
                     isBlocking = false;
                     label = 'OK';
                     badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    highContrastBadgeClass = 'bg-emerald-600 text-white ring-1 ring-emerald-700 font-bold';
                     dotClass = 'bg-emerald-600';
                     hint = '';
                   }
@@ -2108,23 +2250,23 @@
                   isBlocking = false;
                   label = 'OK';
                   badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  highContrastBadgeClass = 'bg-emerald-600 text-white ring-1 ring-emerald-700 font-bold';
                   dotClass = 'bg-emerald-600';
                   hint = '';
                 }
               }
 
-              return {
-                ...req,
-                matchedFile,
-                statusObj: {
-                  status,
-                  isBlocking,
-                  label,
-                  badgeClass,
-                  dotClass,
-                  hint
-                }
+              req.matchedFile = matchedFile;
+              req.statusObj = {
+                status,
+                isBlocking,
+                label,
+                badgeClass,
+                highContrastBadgeClass,
+                dotClass,
+                hint
               };
+              return req;
             });
           });
 
@@ -2559,11 +2701,11 @@
 
           // PDF Package Generation with Cover Page, Table of Contents (Page 2), Document Assembly & Footers
           const generatePackagePdf = async () => {
-            if (hasBlockingIssues.value) {
+            if (hasBlockingIssues.value || duplicateFilesCount.value > 0) {
               showToast(
                 lang.value === 'bn' 
-                  ? 'বাধা প্রদানকারী সমস্যা থাকায় প্যাকেজ তৈরি করা সম্ভব নয়!' 
-                  : 'Cannot generate package with blocking issues!',
+                  ? 'বাধা প্রদানকারী সমস্যা বা ডুপ্লিকেট ফাইল থাকায় প্যাকেজ তৈরি করা সম্ভব নয়!' 
+                  : 'Cannot generate package with blocking issues or duplicate files!',
                 'error'
               );
               return;
@@ -3023,7 +3165,11 @@
                 generationStepDetail.value = `Appending Document #${item.order}: ${item.title_en} (${item.matchedFile.pageCount} pages)`;
 
                 try {
-                  const donorPdf = await PDFDocument.load(item.matchedFile.bytes);
+                  const donorPdf = await PDFDocument.load(item.matchedFile.bytes, { ignoreEncryption: false });
+                  if (donorPdf.isEncrypted) {
+                    console.warn(`Bypassing encrypted PDF for Doc #${item.order}: ${item.matchedFile.name}`);
+                    continue;
+                  }
                   const donorPageIndices = donorPdf.getPageIndices();
                   const copiedPages = await mergedPdf.copyPages(donorPdf, donorPageIndices);
 
@@ -3031,7 +3177,7 @@
                     mergedPdf.addPage(page);
                   }
                 } catch (mergeErr) {
-                  console.error('Error merging document #' + item.order, mergeErr);
+                  console.warn(`Corrupt PDF bypassed safely during assembly for Doc #${item.order}: ${item.matchedFile.name}`, mergeErr);
                 }
 
                 generationProgress.value = Math.floor(40 + ((i + 1) / itemsToInclude.length) * 45);
@@ -3141,18 +3287,22 @@
               const deadline = tender.value.submission_deadline || 'N/A';
 
               const checklistRows = computedRequirements.value.map(req => {
+                const combinedTitle = req.title_bn 
+                  ? `${req.title_en} (${req.title_bn})` 
+                  : req.title_en;
+
                 return {
+                  'Requirement ID': req.id || ('REQ-' + req.order),
                   'Order': req.order,
+                  'Document Title (EN & BN)': combinedTitle,
                   'Document Title (EN)': req.title_en,
-                  'Document Title (BN)': req.title_bn,
-                  'Mandatory': req.is_mandatory ? 'YES' : 'NO',
-                  'Requires Expiry': req.has_expiry ? 'YES' : 'NO',
-                  'Expiry Date': req.has_expiry ? (req.expiryDate || 'NOT PROVIDED') : 'N/A',
+                  'Document Title (BN)': req.title_bn || 'N/A',
                   'Matched File Name': req.matchedFile ? req.matchedFile.name : 'NONE',
                   'Page Count': req.matchedFile ? req.matchedFile.pageCount : 0,
-                  'SHA-256 Hash': req.matchedFile ? req.matchedFile.hash : 'N/A',
+                  'Expiry Date': req.has_expiry ? (req.expiryDate || 'NOT PROVIDED') : 'N/A',
                   'Status': req.statusObj.status,
-                  'Blocks Package?': req.statusObj.isBlocking ? 'YES (BLOCKING)' : 'NO (CLEAR)'
+                  'Mandatory': req.is_mandatory ? 'YES' : 'NO',
+                  'SHA-256 Hash': req.matchedFile ? req.matchedFile.hash : 'N/A'
                 };
               });
 
@@ -3337,7 +3487,9 @@
             nextPreviewPage,
             zoomInPreview,
             zoomOutPreview,
-            downloadSinglePdf
+            downloadSinglePdf,
+            isSubmissionView,
+            onDateInput
           };
         }
       }).mount('#app');
